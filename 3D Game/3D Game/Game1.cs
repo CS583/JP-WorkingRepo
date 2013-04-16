@@ -47,7 +47,7 @@ namespace _3D_Game
         Texture2D crosshairTexture;
 
         // variables for game stats
-        public enum GameState { START, PLAY, LEVEL_CHANGE, END }
+        public enum GameState { START, PLAY, LEVEL_CHANGE, END, PAUSE }
         GameState currentGameState = GameState.START;
 
         SplashScreen splashScreen;
@@ -114,6 +114,18 @@ namespace _3D_Game
                     trackCue.Stop(AudioStopOptions.Immediate);
                     break;
 
+                case GameState.PAUSE:
+                    splashScreen.SetData("Game Paused",
+                        GameState.PAUSE);
+                    modelManager.Enabled = false;
+                    modelManager.Visible = false;
+                    splashScreen.Enabled = true;
+                    splashScreen.Visible = true;
+
+                    //Stop the sound track look
+                    trackCue.Stop(AudioStopOptions.Immediate);
+                    break;
+
             }
         }
 
@@ -171,7 +183,7 @@ namespace _3D_Game
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            crosshairTexture = Content.Load<Texture2D>(@"textures\crosshair");
+            crosshairTexture = Content.Load<Texture2D>(@"textures\spaceship_cockpit");
             powerUpFont = Content.Load<SpriteFont>(@"fonts\PowerUpFont");
             //Load sound
             audioEngine = new AudioEngine(@"Content\Audio\GameAudio.xgs");
@@ -216,6 +228,15 @@ namespace _3D_Game
 
             UpdatePowerUp(gameTime);
 
+
+            if (Keyboard.GetState().IsKeyDown(Keys.P) && currentGameState != GameState.PAUSE)
+            {
+                ChangeGameState(GameState.PAUSE, 0);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Enter) && currentGameState == GameState.PAUSE)
+            {
+                ChangeGameState(GameState.PLAY, 0);
+            }
             
 
             base.Update(gameTime);
@@ -242,18 +263,20 @@ namespace _3D_Game
                 //Draw the current score
                 string scoreText = "Score: " + score;
                 spriteBatch.DrawString(scoreFont, scoreText,
-                    new Vector2(10, 10), Color.Red);
+                    new Vector2(125, (Window.ClientBounds.Height) -175), Color.Red);
 
-                string WeaponText = "Special Weapon: " + specialList;
+                string WeaponText = "Missiles: " + specialList;
                 spriteBatch.DrawString(scoreFont, WeaponText,
-                    new Vector2(10, scoreFont.MeasureString(scoreText).Y + 40),
+                    new Vector2(125, (Window.ClientBounds.Height)-175 + scoreFont.MeasureString(scoreText).Y),
                     Color.Red);
 
                 //Let the player know how maney misses left
                 spriteBatch.DrawString(scoreFont, "Misses Left: " +
                     modelManager.missesLeft,
-                    new Vector2(10, scoreFont.MeasureString(scoreText).Y + 10),
+                    new Vector2((Window.ClientBounds.Width) - 200, (Window.ClientBounds.Height) - 250),
                     Color.Red);
+
+
                 spriteBatch.Draw(crosshairTexture,
                     new Vector2((Window.ClientBounds.Width / 2)
                     - (crosshairTexture.Width / 2),
@@ -264,7 +287,7 @@ namespace _3D_Game
                 //Let the player know how much health he has
                 spriteBatch.DrawString(scoreFont, "Health: " +
                     modelManager.playerHealth,
-                    new Vector2(Window.ClientBounds.Width-200, scoreFont.MeasureString(scoreText).Y + 10),
+                    new Vector2(Window.ClientBounds.Width-250, (Window.ClientBounds.Height)-175),
                     Color.Red);
 
                 // If power up time is a live

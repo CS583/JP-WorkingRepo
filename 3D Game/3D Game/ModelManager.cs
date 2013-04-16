@@ -404,7 +404,7 @@ namespace _3D_Game
                     maxRollAngle - (maxRollAngle / 2);
             
             //25% chance to spawn shooting enemy
-            if (((Game1)Game).rnd.Next(4) <= 1)
+            if (((Game1)Game).rnd.Next(8) <= 1)
             {
                 // Add shooting enemy
                 models.Add(new ShootingEnemy(
@@ -648,15 +648,15 @@ namespace _3D_Game
                 if (enemiesReadyToShoot[i].getShoot())
                 {
                     enemyShots.Add(new SpinningEnemy(
-                        Game.Content.Load<Model>(@"models\ammo"),
-                        enemiesReadyToShoot[i].getPosition(), enemiesReadyToShoot[i].getDirection() * 5, 0, 0, 0));
+                        Game.Content.Load<Model>(@"models\spaceship"),
+                        enemiesReadyToShoot[i].getPosition(), enemiesReadyToShoot[i].getDirection() * 2, 0, 0, 0));
                     enemiesReadyToShoot[i].setShoot(false);
                     enemiesReadyToShoot.RemoveAt(i);
                     --i;
                 }
             }
 
-            //Update shots
+            //Update enemy shots
             for (int i = 0; i < enemyShots.Count; ++i)
             {
                 // Update each shot
@@ -672,7 +672,20 @@ namespace _3D_Game
                 else
                 {
                     // If shot is still in play, check for collisions
-                    
+                    for (int j = 0; j < shots.Count; ++j)
+                    {
+
+                        if (enemyShots[i].CollidesWith(shots[j].model,
+                            shots[j].GetWorld()))
+                        {
+                            shots.RemoveAt(j);
+                            enemyShots.RemoveAt(i);
+                            --i;
+
+                            ((Game1)Game).PlayCue("Explosions");
+                            break;
+                        }
+                    }
                 }
             }
         }
